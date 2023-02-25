@@ -91,3 +91,46 @@ FROM loan
 WHERE date BETWEEN 971201 and 971231
 GROUP BY date, duration
 ORDER BY date ASC, duration ASC;
+
+# Query 18
+SELECT account_id, type, SUM(amount) AS total_amount
+FROM trans
+WHERE account_id = 396
+GROUP BY account_id, type;
+
+# Query 19
+SELECT account_id,
+  CASE type
+    WHEN 'VYDAJ' THEN 'OUTGOING'
+    WHEN 'PRIJEM' THEN 'INCOMING'
+  END AS transaction_type,
+  FLOOR(SUM(amount)) AS total_amount
+FROM trans
+WHERE account_id = 396
+GROUP BY account_id, type;
+
+# Query 20
+SELECT account_id,
+  FLOOR(SUM(CASE type WHEN 'PRIJEM' THEN amount ELSE 0 END)) AS incoming_amount,
+  FLOOR(SUM(CASE type WHEN 'VYDAJ' THEN amount ELSE 0 END)) AS outgoing_amount,
+  FLOOR(SUM(CASE type WHEN 'PRIJEM' THEN amount ELSE -amount END)) AS difference
+FROM trans
+WHERE account_id = 396
+GROUP BY account_id;
+
+# Query 21
+# 2 options
+SELECT account_id,
+    (FLOOR(SUM(CASE WHEN type = "PRIJEM" THEN amount END)) - FLOOR(SUM(CASE WHEN type = "VYDAJ" THEN amount END))) as difference
+FROM trans
+GROUP BY account_id
+ORDER BY difference DESC
+LIMIT 10;
+
+SELECT account_id, 
+	FLOOR(SUM(IF(TYPE='PRIJEM', amount, 0))) - FLOOR(SUM(IF(TYPE='VYDAJ', amount, 0))) AS Difference
+FROM bank.trans
+GROUP BY account_id
+ORDER BY Difference DESC
+LIMIT 10;
+
